@@ -38,12 +38,15 @@
       <div class="tagline">Aprendizagem de Máquina · 2026</div>
     </div>
   </div>
-  <nav>
-    <a href="../index.html">Início</a>
-    <a href="atividade-1.html">Atividade 1</a>
-    <a href="mapa-mental.html" class="active">Mapa Mental</a>
-    <a href="https://github.com/fsd-dantas/ppgia-puc-pr-am" target="_blank" rel="noopener">GitHub</a>
-  </nav>
+  <div class="nav-right">
+    <nav>
+      <a href="../index.html">Início</a>
+      <a href="atividade-1.html">Atividade 1</a>
+      <a href="mapa-mental.html">Mapa Mental</a>
+      <a href="https://github.com/fsd-dantas/ppgia-puc-pr-am" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="theme-toggle" data-theme-toggle aria-label="Alternar tema"></button>
+  </div>
 </header>
 
 <!-- Hero -->
@@ -67,10 +70,18 @@
   <div class="container-wide">
 
     <div class="card" data-reveal style="padding:var(--space-4);">
+      <!-- Dark version (shown in dark mode) -->
       <img
         src="../assets/img/mindmap.png"
-        alt="Mapa mental completo da disciplina Aprendizagem de Máquina — 5 módulos: Fundamentos, Protocolos Experimentais, Técnicas Rasas, Modelos Descritivos, Técnicas Profundas"
-        class="mindmap-img"
+        alt="Mapa mental — versão escura"
+        class="mindmap-img mindmap-dark"
+        loading="lazy"
+      >
+      <!-- Light version (shown in light mode) -->
+      <img
+        src="../assets/img/mindmap-light.png"
+        alt="Mapa mental — versão clara"
+        class="mindmap-img mindmap-light"
         loading="lazy"
       >
     </div>
