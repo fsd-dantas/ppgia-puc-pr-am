@@ -10,11 +10,11 @@
 
 Deep techniques extend the parametric learning paradigm of the MLP to architectures capable of learning hierarchical feature representations directly from raw data. The central insight is that useful features — edges, textures, syntax, temporal patterns — need not be hand-crafted; they can be learned jointly with the classifier or regressor through backpropagation across many layers.
 
-This module covers the theoretical foundations common to all deep architectures, followed by the three canonical families: Multilayer Perceptrons (fully connected), Convolutional Neural Networks (spatial/local structure), and Recurrent Neural Networks (sequential structure). Modern variants and the current transformer-dominated landscape are surveyed as extended reading.
+This module covers the biological motivation and the Perceptron as the atomic unit of neural computation, the theoretical foundations common to all deep architectures, and five canonical families: Multilayer Perceptrons (fully connected), Convolutional Neural Networks (spatial/local structure), Recurrent Neural Networks (sequential structure), Siamese Networks (similarity learning), and the Transformer with its role as a generative model.
 
 ---
 
-## 1. Universal Approximation and the Case for Depth
+## 2. Universal Approximation and the Case for Depth
 
 A single hidden-layer MLP with a non-polynomial activation function can approximate any continuous function on a compact set to arbitrary precision — the **Universal Approximation Theorem** (Cybenko, 1989; Hornik, 1991). This establishes theoretical expressiveness but does not address efficiency.
 
@@ -22,7 +22,7 @@ A single hidden-layer MLP with a non-polynomial activation function can approxim
 
 ---
 
-## 2. Backpropagation and Gradient-Based Optimisation
+## 3. Backpropagation and Gradient-Based Optimisation
 
 ### Forward Pass
 
@@ -66,7 +66,7 @@ where $\mathbf{z}^{(l)} = \mathbf{W}^{(l)} \mathbf{a}^{(l-1)} + \mathbf{b}^{(l)}
 
 ---
 
-## 3. Multilayer Perceptron (MLP)
+## 4. Multilayer Perceptron (MLP)
 
 A fully connected feedforward network. Each neuron in layer $l$ is connected to every neuron in layer $l-1$.
 
@@ -76,7 +76,7 @@ A fully connected feedforward network. Each neuron in layer $l$ is connected to 
 
 ---
 
-## 4. Convolutional Neural Networks (CNN)
+## 5. Convolutional Neural Networks (CNN)
 
 CNNs exploit the spatial locality and translational invariance of image-like data through **convolutional layers**:
 
@@ -95,7 +95,7 @@ $$(\mathbf{X} * \mathbf{K})_{i,j} = \sum_m \sum_n \mathbf{X}_{i+m, j+n} \cdot \m
 
 ---
 
-## 5. Recurrent Neural Networks (RNN)
+## 6. Recurrent Neural Networks (RNN)
 
 RNNs process sequential data by maintaining a hidden state $\mathbf{h}_t$ that summarises history:
 
@@ -127,15 +127,82 @@ LSTMs and GRUs are directly applicable to the time-series prediction tasks in th
 
 ---
 
-## 6. Beyond: Transformers and Modern Architectures
+## 7. Siamese Networks
 
-The transformer architecture (Vaswani et al., 2017) has largely supplanted RNNs for sequence modelling. Self-attention computes pairwise relevance across all positions simultaneously:
+A Siamese network is an architecture designed for **similarity learning**: rather than classifying an input into a fixed set of classes, it learns a function that measures how similar two inputs are. The architecture consists of two (or more) identical subnetworks — sharing the same weights — that each encode one input into an embedding space:
+
+$$f_\theta(\mathbf{x}_1), \quad f_\theta(\mathbf{x}_2) \quad \text{(shared encoder } f_\theta \text{)}$$
+
+The similarity (or distance) between the two embeddings drives the final decision. Common distance functions: Euclidean distance $\|f_\theta(\mathbf{x}_1) - f_\theta(\mathbf{x}_2)\|_2$, cosine similarity.
+
+### Loss Functions
+
+**Contrastive loss** (Hadsell et al., 2006) — pulls similar pairs together, pushes dissimilar pairs apart:
+
+$$\mathcal{L} = (1 - y) \cdot \frac{1}{2} D^2 + y \cdot \frac{1}{2} \max(0,\, m - D)^2$$
+
+where $D = \|f_\theta(\mathbf{x}_1) - f_\theta(\mathbf{x}_2)\|_2$, $y = 1$ for dissimilar pairs, and $m$ is a margin.
+
+**Triplet loss** (Schroff et al., 2015) — anchor $\mathbf{x}_a$, positive $\mathbf{x}_p$ (same class), negative $\mathbf{x}_n$ (different class):
+
+$$\mathcal{L} = \max\left(0,\; \|f_\theta(\mathbf{x}_a) - f_\theta(\mathbf{x}_p)\|_2^2 - \|f_\theta(\mathbf{x}_a) - f_\theta(\mathbf{x}_n)\|_2^2 + \alpha\right)$$
+
+where $\alpha > 0$ enforces that positives are strictly closer than negatives by a margin.
+
+### Applications
+
+Siamese networks excel in **few-shot learning** and **metric learning** scenarios where class distributions shift or new classes appear at test time. The model generalises by similarity, not by memorised class boundaries:
+
+- **Face verification** (same person / different person) — LFW benchmark.
+- **Signature verification** and handwritten character recognition — central to the research group of Prof. Alceu (cf. Tannugi, Britto & Koerich, SMC 2019 on cross-dataset facial expression recognition).
+- **Cross-dataset transfer** — the shared encoder can be pre-trained on one domain and fine-tuned for another.
+
+**Key design decision:** The backbone encoder $f_\theta$ can be any architecture — CNN for images, LSTM for sequences, MLP for tabular data. The Siamese structure is a training paradigm, not a fixed architecture.
+
+---
+
+## 8. Transformer and Generative Models
+
+The transformer (Vaswani et al., 2017) represents a fundamental shift from recurrent and convolutional inductive biases to a fully attention-based mechanism. It is the dominant architecture for sequence modelling, NLP, and increasingly for vision and multimodal tasks.
+
+### Self-Attention Mechanism
+
+Given an input sequence $\mathbf{X} \in \mathbb{R}^{n \times d}$, self-attention projects it into query, key, and value matrices via learned projections $\mathbf{W}^Q, \mathbf{W}^K, \mathbf{W}^V$:
+
+$$\mathbf{Q} = \mathbf{X}\mathbf{W}^Q, \quad \mathbf{K} = \mathbf{X}\mathbf{W}^K, \quad \mathbf{V} = \mathbf{X}\mathbf{W}^V$$
 
 $$\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}\left(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{d_k}}\right)\mathbf{V}$$
 
-**Graph Neural Networks (GNNs)** extend deep learning to graph-structured data — directly relevant to SDN topology modelling.
+The $\frac{1}{\sqrt{d_k}}$ scaling prevents dot products from saturating the softmax as $d_k$ grows. **Multi-head attention** runs $h$ independent attention heads in parallel, concatenates their outputs, and projects the result — allowing simultaneous attention to different representation subspaces.
 
-These architectures are surveyed as extended reading; they are not covered in the course's primary scope.
+**Key advantage over RNNs:** All positions are processed in parallel; long-range dependencies are modelled in $O(1)$ sequential operations (vs. $O(n)$ for RNNs). Trade-off: $O(n^2)$ memory and compute in sequence length $n$.
+
+### Architecture
+
+The original encoder–decoder transformer:
+
+- **Encoder:** $N$ identical layers, each with multi-head self-attention + position-wise feed-forward + residual connection + layer normalisation.
+- **Decoder:** Same structure plus a cross-attention sub-layer attending to encoder output.
+- **Positional encoding:** Self-attention is permutation-invariant, so positional information is injected via sinusoidal encodings added to input embeddings.
+
+### Transformer as a Generative Model
+
+Generative transformers model the conditional distribution $p(x_t \mid x_1, \ldots, x_{t-1})$ autoregressively — the probability of the next token given all previous tokens. Generation proceeds by iterative sampling.
+
+**Decoder-only (GPT family):** Trained on language modelling; generates sequences token by token.
+
+**Encoder–decoder (T5, original seq2seq):** Encoder builds a context representation; decoder generates conditioned on it.
+
+Broader generative model landscape:
+
+| Model | Generative mechanism |
+|---|---|
+| Autoregressive transformer | $p(x_t \mid x_{<t})$ — sequential sampling |
+| Variational Autoencoder (VAE) | Encoder maps to latent distribution $q(\mathbf{z}\mid\mathbf{x})$; decoder samples |
+| GAN | Generator vs. discriminator adversarial training |
+| Diffusion model | Iterative denoising of Gaussian noise toward data distribution |
+
+**Graph Neural Networks (GNNs)** extend deep learning to graph-structured data — directly relevant to SDN topology modelling. They are surveyed in Extended Reading below.
 
 ---
 

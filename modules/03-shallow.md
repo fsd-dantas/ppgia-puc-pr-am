@@ -73,11 +73,31 @@ $$\min_{\mathbf{w}, b, \boldsymbol{\xi}} \frac{1}{2}\|\mathbf{w}\|^2 + C \sum_i 
 
 ### Decision Tree
 
-Recursively partitions the feature space using axis-aligned splits. At each node, the split is chosen to maximise an impurity reduction criterion:
+Recursively partitions the feature space using axis-aligned splits. At each node, the split is chosen to maximise an impurity reduction criterion.
 
-- **Classification — Gini impurity:** $G = 1 - \sum_k p_k^2$
-- **Classification — Entropy:** $H = -\sum_k p_k \log p_k$
-- **Regression — Variance reduction:** $\Delta \text{Var} = \text{Var}(y_\text{parent}) - \sum_\text{child} w_c \cdot \text{Var}(y_c)$
+#### ID3 Algorithm
+
+ID3 (Iterative Dichotomiser 3, Quinlan 1986) is the foundational decision tree learning algorithm. It selects splits using **Information Gain** — the reduction in entropy achieved by splitting on attribute $A$:
+
+$$\text{Entropy}(S) = -\sum_{k=1}^{K} p_k \log_2 p_k$$
+
+where $p_k$ is the proportion of examples in class $k$ in set $S$. Entropy is 0 when all examples belong to one class (pure node) and maximal at $\log_2 K$ when classes are uniformly distributed.
+
+**Information Gain** of splitting $S$ on attribute $A$:
+
+$$\text{Gain}(S, A) = \text{Entropy}(S) - \sum_{v \in \text{Values}(A)} \frac{|S_v|}{|S|} \cdot \text{Entropy}(S_v)$$
+
+where $S_v$ is the subset of $S$ for which $A = v$. ID3 greedily selects the attribute $A^* = \arg\max_A \text{Gain}(S, A)$ at each node.
+
+**Limitations of ID3:** Biased toward attributes with many values (high cardinality); no pruning; handles only categorical attributes. **C4.5** (Quinlan 1993) extends ID3 with Gain Ratio (normalises by split information), continuous attribute handling, and pruning. **CART** uses Gini impurity instead of entropy and produces binary splits.
+
+**Impurity criteria comparison:**
+
+| Criterion | Formula | Algorithm |
+|---|---|---|
+| Entropy / Information Gain | $-\sum_k p_k \log_2 p_k$ | ID3, C4.5 |
+| Gini impurity | $1 - \sum_k p_k^2$ | CART |
+| Variance reduction | $\text{Var}(y) - \sum_c w_c \text{Var}(y_c)$ | CART (regression) |
 
 **Key hyperparameters:** Maximum depth, minimum samples per leaf, impurity criterion.
 
@@ -122,6 +142,47 @@ $$\mathcal{L}^{(t)} = \sum_i \left[ g_i f_t(\mathbf{x}_i) + \frac{1}{2} h_i f_t^
 where $g_i = \partial_{\hat{y}} \ell(y_i, \hat{y})$ and $h_i = \partial^2_{\hat{y}} \ell(y_i, \hat{y})$ are first and second derivatives of the loss.
 
 **Key hyperparameters:** Learning rate $\eta$, max depth, subsample ratio, $\lambda$ (L2 regularisation), $\alpha$ (L1 regularisation), number of rounds.
+
+### Heterogeneous Ensembles and Classifier Combination
+
+While homogeneous ensembles (Bagging, Boosting, Random Forest) combine multiple instances of the **same** base learner type, **heterogeneous ensembles** combine fundamentally different classifiers — e.g., a Decision Tree, a k-NN, and a Naive Bayes — exploiting the diversity of their distinct inductive biases.
+
+**Motivation:** Classifiers that make different types of errors on different regions of the feature space are better candidates for combination than classifiers with correlated errors. Diversity is the key ingredient.
+
+#### Combination Rules (Fixed)
+
+Given $T$ classifiers $\{f_1, \ldots, f_T\}$ and $K$ classes, fixed combination rules aggregate outputs without learning additional parameters:
+
+| Rule | Input type | Formula / logic |
+|---|---|---|
+| **Majority vote** | Class labels | $\hat{y} = \arg\max_k \sum_t \mathbb{1}[f_t(\mathbf{x}) = k]$ |
+| **Weighted vote** | Class labels | $\hat{y} = \arg\max_k \sum_t w_t \cdot \mathbb{1}[f_t(\mathbf{x}) = k]$, $w_t$ set by validation accuracy |
+| **Sum rule** | Posterior probabilities | $\hat{y} = \arg\max_k \sum_t P_t(k \mid \mathbf{x})$ |
+| **Product rule** | Posterior probabilities | $\hat{y} = \arg\max_k \prod_t P_t(k \mid \mathbf{x})$ — assumes classifier independence |
+| **Max rule** | Posterior probabilities | $\hat{y} = \arg\max_k \max_t P_t(k \mid \mathbf{x})$ |
+| **Borda count** | Rankings | Sum of rank positions across classifiers |
+
+**Sum rule** is empirically robust and theoretically well-motivated when classifiers produce calibrated probability estimates. **Product rule** is theoretically optimal under classifier independence (rarely holds in practice) but degrades badly when one classifier assigns near-zero probability.
+
+#### Stacking (Stacked Generalisation)
+
+A **trainable** combination method: a meta-learner $g$ is trained on the out-of-fold predictions of the base classifiers:
+
+1. Split training data into $k$ folds.
+2. For each fold, train all base classifiers on the remaining $k-1$ folds and collect predictions on the held-out fold.
+3. Assemble a new dataset where each row is the vector of base classifier predictions; train $g$ on this dataset.
+4. At test time: obtain base classifier predictions, feed to $g$ for the final prediction.
+
+Stacking can learn non-linear combinations and asymmetric weighting — at the cost of added complexity and risk of overfitting the meta-learner.
+
+#### Classifier Selection vs. Fusion
+
+- **Fusion:** All classifiers contribute to every prediction (rules above).
+- **Selection:** For a given query $\mathbf{x}$, select the single most competent classifier based on local accuracy in the neighbourhood of $\mathbf{x}$ (Dynamic Classifier Selection, DCS) or combine a subset (Dynamic Ensemble Selection, DES).
+
+**Common pitfall:** Combining classifiers that are highly correlated (e.g., five Random Forests trained on the same features) yields negligible improvement — diversity is the prerequisite for ensemble gain.
+
+---
 
 ### MLP as a Shallow Baseline
 
