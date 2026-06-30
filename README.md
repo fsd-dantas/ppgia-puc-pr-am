@@ -178,19 +178,11 @@ All adaptive images in this repository use the following pattern, supporting bot
 
 ---
 
-## Open Questions
+## Roadmap
 
-The following decisions remain open before module files are written. Each is a genuine design choice — not a default:
-
-1. **Single README vs. multi-file:** Should the five modules live as separate files in `/modules/` (current plan), or as `##` sections within a single long `README.md`? Separate files allow deeper content and cleaner git diffs; a single file gives a more cohesive scroll experience on GitHub.
-
-2. **Mind map interactivity:** The current mind map is a static PNG. Should a future iteration convert it to an SVG (editable, scalable, theme-adaptive without two image files) or a Mermaid diagram (GitHub-native, no image files at all)?
-
-3. **Activities placement:** Should activity write-ups live in `/activities/` as separate files (current plan), or be integrated as subsections within the relevant module files (e.g., Atividade 1 Part A inside `03-shallow.md`)?
-
-4. **Research context prominence:** How much space should the SDN/Smart Grid application framing occupy? Options range from the current table on the landing README to a dedicated `research-context.md` file with per-technique analysis.
-
-5. **Bibliography:** Do you have the complete ABNT-formatted reference list from Prof. Alceu's syllabus ready to transcribe into `references.md`? This can be done at any point, but the module files will link to it from the start.
+- [ ] Convert mind map from static PNG to interactive SVG (theme-adaptive, single file)
+- [ ] Open a dedicated SDN/Smart Grid research repo and link from the Research Context section
+- [ ] Add future activity write-ups to `/activities/` as the course progresses
 
 ---
 
@@ -208,5 +200,5 @@ The following decisions remain open before module files are written. Each is a g
 
 ---
 
-*Last updated: June 2026 — collaborative draft, pre-implementation.*  
+*Last updated: June 2026.*  
 *Instructor: Prof. Alceu de Souza Britto Jr. (alceu@ppgia.pucpr.br) · PPGIA/PUC-PR*
