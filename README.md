@@ -1,7 +1,7 @@
 # Machine Learning — Research Fundamentals Study Plan
 
 > PPGIA / PUC-PR · MSc 2026 · Aprendizagem de Máquina  
-> Fernando Dantas · [fsd-dantas.github.io/ppgia-puc-pr-am](https://fsd-dantas.github.io/ppgia-puc-pr-am)
+> Fernando Dantas · [fsd-dantas.github.io/machine-learning-fundamentals](https://fsd-dantas.github.io/machine-learning-fundamentals)
 
 ---
 
@@ -201,4 +201,5 @@ All adaptive images in this repository use the following pattern, supporting bot
 ---
 
 *Last updated: June 2026.*  
-*Instructor: Prof. Alceu de Souza Britto Jr. (alceu@ppgia.pucpr.br) · PPGIA/PUC-PR*
+*Course: Aprendizagem de Máquina · PPGIA/PUC-PR · MSc 2026*  
+*Instructor: Prof. Alceu de Souza Britto Jr. (alceu@ppgia.pucpr.br)*
